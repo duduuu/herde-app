@@ -16,15 +16,10 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 const ICON: &[u8] = include_bytes!("../assets/icons/herdr-ui-icon-clean.png");
-#[cfg(not(windows))]
-const APP_INSTALL: &str = "curl -fsSL https://releases.herdr.dev/app/install.sh | sh";
-#[cfg(windows)]
-const APP_INSTALL: &str = "powershell -c \"irm https://releases.herdr.dev/app/install.ps1 | iex\"";
-#[cfg(not(windows))]
-const CORE_INSTALL: &str = "curl -fsSL https://releases.herdr.dev/core/install.sh | sh";
-#[cfg(windows)]
-const CORE_INSTALL: &str = "powershell -c \"irm https://releases.herdr.dev/core/install.ps1 | iex\"";
-const CORE_PLACE: &str = if cfg!(windows) { r"%LOCALAPPDATA%\Programs\herdr-core" } else { "~/.local/bin" };
+// INTERNAL BUILD: no public installers; both programs come from your
+// organization's distribution.
+const APP_INSTALL: &str = "install the new build from your organization's internal distribution";
+const CORE_INSTALL: &str = "install herdr-core from your organization's internal distribution, then try again";
 
 /// What's missing before the main window can open.
 pub enum Need {
@@ -169,7 +164,7 @@ impl Setup {
             Need::Install => (
                 "Herdr needs herdr-core".into(),
                 "herdr-core runs your terminals and agents, and keeps them alive when this window closes. Herdr couldn't find it on this computer.".into(),
-                format!("Install it for me puts it in {CORE_PLACE} (with hc), like its own installer: {CORE_INSTALL}"),
+                format!("To fix it, {CORE_INSTALL}."),
             ),
             Need::Connect(error) => (
                 "Herdr can't connect to herdr-core".into(),
@@ -179,17 +174,17 @@ impl Setup {
             Need::Fix(Mismatch::TooOld { have, need }) => (
                 "Herdr needs a newer herdr-core".into(),
                 format!("Yours is {have}; this Herdr needs {need} or newer. Updating keeps your terminals running."),
-                "Or update it yourself: hc update".into(),
+                format!("To update it, {CORE_INSTALL}."),
             ),
             Need::Fix(Mismatch::Missing(methods)) => (
                 "Herdr needs a newer herdr-core".into(),
                 format!("Your herdr-core can't do everything this Herdr needs ({}). Updating keeps your terminals running.", methods.join(", ")),
-                "Or update it yourself: hc update".into(),
+                format!("To update it, {CORE_INSTALL}."),
             ),
             Need::Fix(Mismatch::Newer { generation }) => (
                 "This Herdr is older than your herdr-core".into(),
                 format!("Your herdr-core speaks a newer protocol (generation {generation}) than this Herdr understands. Update Herdr; your terminals keep running."),
-                format!("Update Herdr: {APP_INSTALL}"),
+                format!("To update Herdr, {APP_INSTALL}."),
             ),
         }
     }

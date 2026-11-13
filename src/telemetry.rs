@@ -9,11 +9,8 @@
 //! and sends it. Nothing here may affect the app: it runs off the UI thread,
 //! never waits on anything, and every error just loses data.
 //!
-//! On unless settings.json says `"telemetry": false` (that also deletes the
-//! id and anything not sent yet). `DO_NOT_TRACK`, `HERDR_TELEMETRY=0` and CI
-//! turn it off for one run. Only release builds (`HERDR_APP_RELEASE`) send,
-//! or a build pointed at a test server with `HERDR_TELEMETRY_URL`: a build
-//! from source and the sandbox collect and show, but never send.
+//! INTERNAL BUILD: collection is always off and nothing is ever sent. There is
+//! no endpoint and no network code; the settings switch has no effect.
 
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -25,7 +22,6 @@ use std::sync::{Mutex, OnceLock};
 use std::time::{Duration, Instant, SystemTime};
 
 pub const VERSION: u32 = 1;
-const ENDPOINT: &str = "https://telemetry.herdr.dev/v1/report";
 /// Frozen reports older than this are dropped unsent.
 const KEEP_DAYS: i64 = 7;
 const TICK: Duration = Duration::from_secs(30);
@@ -97,12 +93,9 @@ fn read_env_off() -> Option<&'static str> {
     CI.iter().any(|k| set(k).is_some()).then_some("CI")
 }
 
-/// Where reports go, if this build sends at all.
+/// Internal build: reports never leave this machine.
 fn endpoint() -> Option<String> {
-    match std::env::var("HERDR_TELEMETRY_URL").ok().filter(|u| !u.is_empty()) {
-        Some(url) => Some(url),
-        None => option_env!("HERDR_APP_RELEASE").map(|_| ENDPOINT.to_owned()),
-    }
+    None
 }
 
 pub fn collecting() -> bool {
@@ -147,7 +140,8 @@ pub fn window_open() {
 /// settings.json's `telemetry` (read again whenever the file changes).
 pub fn set_setting(on: bool) {
     SETTING.store(on, Ordering::Relaxed);
-    let now = on && env_off().is_none();
+    // Internal build: never collect, whatever the setting says.
+    let now = false;
     if ON.swap(now, Ordering::SeqCst) && !now {
         EPOCH.fetch_add(1, Ordering::SeqCst);
     }
@@ -178,7 +172,8 @@ pub fn start(setting: bool) {
         return;
     }
     SETTING.store(setting, Ordering::Relaxed);
-    ON.store(setting && env_off().is_none(), Ordering::Relaxed);
+    // Internal build: never collect, whatever the setting says.
+    ON.store(false, Ordering::Relaxed);
     let _ = std::thread::Builder::new().name("telemetry".into()).spawn(move || Worker::new().run(rx));
 }
 
@@ -576,34 +571,10 @@ impl Worker {
         out
     }
 
+    /// Internal build: nothing is ever sent; anything queued is dropped.
     fn send_queued(&mut self) {
-        let Some(url) = endpoint() else { return };
-        if Instant::now() < self.next_send {
-            return;
-        }
         for (path, _) in self.queued() {
-            if !self.on() {
-                return;
-            }
-            let Ok(body) = std::fs::read_to_string(&path) else { continue };
-            match post(&url, &body) {
-                Some(code) if (200..300).contains(&code) => {
-                    let sent = json!({ "at": unix_now(), "report": serde_json::from_str::<Value>(&body).unwrap_or(Value::Null) });
-                    let _ = write_atomic(&dir().join("last-sent.json"), &sent.to_string());
-                    let _ = std::fs::remove_file(&path);
-                    self.failures = 0;
-                }
-                // The server will never take this one (a bad or too old report).
-                Some(400 | 404 | 410 | 413 | 422) => {
-                    let _ = std::fs::remove_file(&path);
-                }
-                _ => {
-                    self.failures += 1;
-                    let hours = 1u64 << self.failures.min(5);
-                    self.next_send = Instant::now() + Duration::from_secs(hours.min(24) * 3600 + random_u64() % 600);
-                    return;
-                }
-            }
+            let _ = std::fs::remove_file(&path);
         }
     }
 
@@ -621,7 +592,7 @@ impl Worker {
             "setting": SETTING.load(Ordering::Relaxed),
             "off_because": env_off(),
             "sends": endpoint().is_some(),
-            "endpoint": endpoint().unwrap_or_else(|| ENDPOINT.to_owned()),
+            "endpoint": "",
             "draft": self.install.as_ref().filter(|_| on).map(|i| self.day.report(i)),
             "queued": queued,
             "last_sent": last,
@@ -665,35 +636,6 @@ fn write_atomic(path: &std::path::Path, text: &str) -> std::io::Result<()> {
     let tmp = path.with_extension("tmp");
     std::fs::write(&tmp, text)?;
     std::fs::rename(tmp, path)
-}
-
-/// POSTs one report; the HTTP status, or None if it never got an answer.
-/// Turning telemetry off stops a request still in flight.
-fn post(url: &str, body: &str) -> Option<u16> {
-    use std::io::Write;
-    use std::process::Stdio;
-    let null = if cfg!(windows) { "NUL" } else { "/dev/null" };
-    let mut child = crate::spawn::command(crate::update::system("curl"))
-        .args(["-sS", "--max-time", "20", "-X", "POST", "-H", "content-type: application/json", "--data-binary", "@-", "-o", null, "-w", "%{http_code}", url])
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::null())
-        .spawn()
-        .ok()?;
-    child.stdin.take()?.write_all(body.as_bytes()).ok()?;
-    loop {
-        match child.try_wait() {
-            Ok(Some(_)) => break,
-            Ok(None) if collecting() => std::thread::sleep(Duration::from_millis(50)),
-            _ => {
-                let _ = child.kill();
-                let _ = child.wait();
-                return None;
-            }
-        }
-    }
-    let out = child.wait_with_output().ok()?;
-    String::from_utf8_lossy(&out.stdout).trim().parse().ok().filter(|c| *c > 0)
 }
 
 #[cfg(test)]

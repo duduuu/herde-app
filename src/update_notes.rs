@@ -183,6 +183,8 @@ fn preview_media(url: &str) -> bool {
 }
 
 fn fetch_media(notes: &[Note]) {
+    // INTERNAL BUILD: never downloads release-note media.
+    if !crate::update::ONLINE { return; }
     let dir = path("update-notes-media");
     if std::fs::create_dir_all(&dir).is_err() { return; }
     for media in notes.iter().flat_map(|n| &n.items).flat_map(|item| &item.media) {

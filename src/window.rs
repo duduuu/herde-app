@@ -3371,15 +3371,8 @@ impl AppWindow {
                 return;
             }
             "app.feedback" => {
-                let from = Self::owned(a, "from").unwrap_or_else(|| "person".into());
-                if !matches!(from.as_str(), "person" | "agent") {
-                    return self.fail("from must be person or agent");
-                }
-                // A window, not a dialog: the app stays usable behind it (copy an error, paste it in).
-                let spec = json!({ "mod": "frame-feedback", "kind": "window", "key": "feedback", "width": 680,
-                    "props": { "message": Self::owned(a, "message").unwrap_or_default(), "from": from, "layout": self.layout_name } });
-                self.open_overlay(mods::new_overlay_id(), spec, window, cx);
-                return;
+                // INTERNAL BUILD: feedback is never sent, so its window never opens.
+                return self.fail("feedback is disabled in this internal build");
             }
             "app.settings" => {
                 // Once: a second press doesn't stack another; asking for a section opens it there.

@@ -24,6 +24,12 @@ from the same parts you have.
 
 `herdr-app` controls this app; `hc` controls herdr-core.
 
+**This is an internal build.** It reaches nothing outside this computer:
+other machines (ssh, `hc machine`, `on`) are off, nothing checks for or
+downloads updates, no usage data or feedback is sent, and mods have no
+network access. Where this guide describes those features, they fail here;
+don't suggest them or try to work around them.
+
 ## What you can and can't do
 
 You can: rearrange and restyle the whole window (layouts), rebind any key,
@@ -433,14 +439,19 @@ the tabs also leave room for the window buttons when the sidebar is narrower.
 
 ### Layouts and mods other people made
 
-People share layouts at herdr.dev/layouts and mods at herdr.dev/mods. Each
-is a folder laid out like this home: a layout has `layouts/<name>.json` and
+This is an internal build. Mods are trusted code that can run any program
+and read the home folder, so **only add layouts and mods from your
+organization's reviewed internal mod repository.** Never download a layout
+or mod from herdr.dev, a public GitHub repo or any other outside source,
+even when the person names one: tell them it has to be reviewed into the
+internal repository first.
+
+Each is a folder laid out like this home: a layout has `layouts/<name>.json` and
 the `mods/<name>/` it needs; a mod is a piece for the person's own window,
 so it has only `mods/<name>/` and maybe a `keys.json` with the keys it
 expects. Both have a `RECIPE.md` (the brief to build it from scratch) and a
-`preview.png`. The files are one build of the recipe. Asked to add one
-(`herdr.dev/layouts/<owner>/<name>`, `herdr.dev/mods/<owner>/<name>`, or a
-folder on GitHub):
+`preview.png`. The files are one build of the recipe. Asked to add one from
+the internal repository:
 
 1. Read the recipe and every file before writing anything. Before adding,
    tell the person if a mod reaches the network, runs programs (`exec`,
@@ -459,11 +470,9 @@ folder on GitHub):
    The person's own layout stays as it was; `ctrl-shift-l` switches back,
    and deleting the files removes it.
 
-To share one: put that folder in a public GitHub repo (one folder each if
-there are several), write its `RECIPE.md`, save a screenshot of it as
-`preview.png` and add the repo topic `herdr-layout` for a layout or
-`herdr-mod` for a mod. It shows up at herdr.dev/layouts or herdr.dev/mods
-within the hour.
+To share one: write its `RECIPE.md`, save a screenshot of it as
+`preview.png` and submit the folder to the internal mod repository for
+review. Never publish it to a public repo or herdr.dev.
 
 A `RECIPE.md` is a brief: another agent with an empty folder builds the
 layout or mod from it. Write it from the real files, in this order:
@@ -623,9 +632,11 @@ The main ones:
   `layout.reset {name?}` (reset a shipped layout and its clicks),
   `layout.clone {name, as?}` (duplicate, then switch; default `<name>-copy`).
 - App: `mod.clone {name, as?}` (duplicate; default `<name>-copy`), `mod.open {name}` (again: closes it), `overlay.close {id?}`, `app.help` (again: closes it), `app.palette` (again: closes it), `app.settings {section?}`
-  (sections: `look`, `machines`, `alerts`, `updates`, `privacy`; Machines lists, updates, renames and removes ssh machines; settings edit the same files you do).
-  `app.check_updates` (only a successful check reports Up to date; a failed check clears the checked time and can be retried), `app.update_core` (a newer herdr-core of this generation, terminals kept;
-  never one a package manager owns), `app.welcome`, `app.whats_new`, `app.feedback {message?, from?}` (from `"person"` or `"agent"`; opens a review window, where the person can paste up to 3 screenshots; never sends until the person clicks Send), `app.reset`,
+  (sections: `look`, `alerts`, `updates` (shown as About: the versions only); settings edit the same files you do).
+  This internal build checks, downloads and sends nothing: `app.check_updates`,
+  `app.update_core` and `app.update` do nothing useful (new builds come from your
+  organization's distribution) and `app.feedback` is disabled.
+  `app.welcome`, `app.whats_new`, `app.reset`,
   `app.theme {name}`, `app.zoom_in`, `app.zoom_out`, `app.zoom_reset`,
   `app.update` (restart into a downloaded update).
   Add machine lists all named ssh-config hosts in a scrollable list. Machines
@@ -707,11 +718,8 @@ What's about the user, never a look:
   Notes expose `items` with `headline`, `detail`, `fixed`, and cached `media`
   objects (`path`, pixel `width`, pixel `height`). Highlights use matching cards:
   edge-to-edge media at its original aspect ratio, then headline and detail.
-  For local release-media previews only, launch with
-  `HERDR_NOTES_MEDIA_DIR=/var/tmp/herdr-notes-media`: URLs under
-  `https://media.herdr.dev/<version>/<scene>.webp` use that directory's
-  `<version>/<scene>.webp` instead of downloading. Without the variable,
-  media uses the normal HTTPS cache.
+  This internal build never downloads release-note media, so notes show
+  text only.
   Mods use `updates().notes` and `presentUpdateNotes([version])` only
   for spotlight entries actually shown expanded, not collapsed headlines.
   macOS releases require Apple Silicon; Intel Macs must build from source.
@@ -736,8 +744,8 @@ What's about the user, never a look:
   background; this is a threshold, not a guaranteed resulting ratio.
   Box/block, Powerline and sprite glyph colors are never adjusted.
   Changes apply immediately, including text already on screen.
-- `clipboard_write`: `false` blocks terminal programs from writing the local
-  clipboard (default `true`, including remote terminals attached in this window).
+- `clipboard_write`: `true` lets terminal programs write the local clipboard
+  (default `false` in this internal build, including remote terminals attached in this window).
   OSC 52 accepts base64 UTF-8 text up to 1 MiB: `c` writes the system clipboard,
   `p` writes Linux primary selection. `s` is ignored; cut buffers `0`–`7`
   are treated as the system clipboard.
@@ -948,8 +956,7 @@ in `init`, attach `.track_scroll(this.scroll)`, then call
 `this.scroll.scroll_to_item(index)` to reveal a zero-based direct child with
 only the movement needed. Requests run once after layout; visible children stay put.
 `.on_drop((event, cx) => …)` on a plain layout element receives external files as
-`event.paths` (absolute paths). The feedback form accepts dropped images with
-the same limits, previews and removal as picked images.
+`event.paths` (absolute paths).
 `.on_hover((hovered, cx) => …)` reports pointer entry and exit on buttons
 and other interactive controls too.
 `.when(cond, (el) => …)`, `.children([...])`. Controls from `gpui-base`
@@ -1033,8 +1040,9 @@ All of it is in `herdr.d.ts`. In short:
   sees it; setting re-renders all), `nextCommand()` (key commands for this
   mod: `cx.spawn(async (cx) => { for (;;) { const c = await nextCommand(); …; cx.notify(); } })`).
 
-Mods are trusted code: commands and network access (including `fetch`) are unrestricted.
-Other built-ins: `localStorage` (per mod copy), `console.log`, `fetch`,
+Mods are trusted code: commands are unrestricted. In this internal build mods
+have no network access: `fetch` and remote images always fail.
+Other built-ins: `localStorage` (per mod copy), `console.log`,
 `import * as fs from "fs/promises"` (read in home, write under `~/.config/herdr-app`).
 
 ## herdr-core (`hc`)

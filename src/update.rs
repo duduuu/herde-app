@@ -20,6 +20,9 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Condvar, Mutex};
 use std::time::Duration;
 
+/// INTERNAL BUILD: false. Nothing in the app downloads or installs from the internet.
+pub const ONLINE: bool = false;
+
 const EVERY: Duration = Duration::from_secs(60 * 60);
 /// After a failed check or download (offline, a damaged file).
 const RETRY: Duration = Duration::from_secs(30 * 60);
@@ -116,13 +119,15 @@ pub fn set_core(version: Option<String>, managed: Option<String>) {
     c.managed = managed;
 }
 
+/// INTERNAL BUILD: never checks for updates; builds are distributed internally.
 fn checks_app() -> Option<PathBuf> {
-    root().filter(|_| option_env!("HERDR_APP_RELEASE").is_some() || std::env::var_os("HERDR_RELEASES_URL").is_some())
+    None
 }
 
 /// A release build checks the core; a source build only when pointed at a test release server.
+/// INTERNAL BUILD: never checks the core either.
 fn checks_core() -> bool {
-    option_env!("HERDR_APP_RELEASE").is_some() || std::env::var_os("HERDR_RELEASES_URL").is_some()
+    false
 }
 
 /// For the settings screen: both programs, what's waiting, when we last looked.
@@ -309,22 +314,10 @@ fn check_from(root: &Path, releases: &str) -> Result<Option<String>, String> {
     result.map(|()| Some(version.to_owned()))
 }
 
-/// Downloads, checks and unpacks a release into `work`; returns the app inside.
+/// INTERNAL BUILD: never downloads a release; builds are distributed internally.
 fn unpack(url: &str, sha: &str, work: &Path) -> Result<PathBuf, String> {
-    let tarball = work.join("app.tar.gz");
-    run(crate::spawn::command(system("curl")).args(["-fsSL", "--max-time", "600", "-o"]).arg(&tarball).arg(url))?;
-    let bytes = std::fs::read(&tarball).map_err(|e| e.to_string())?;
-    if sha256(&bytes) != sha.to_ascii_lowercase() {
-        return Err("the download is damaged (checksum mismatch)".into());
-    }
-    run(crate::spawn::command(system("tar")).arg("-xzf").arg(&tarball).arg("-C").arg(work))?;
-    let app = work.join(PACKED);
-    if cfg!(target_os = "macos") {
-        // Authority is absent at -dv, even for a Developer ID release.
-        let signature = Command::new("/usr/bin/codesign").arg("-dvv").arg(&app).output().map_err(|e| format!("codesign: {e}"))?;
-        prepare_macos_bundle(&app, &signature)?;
-    }
-    Ok(app)
+    let _ = (url, sha, work);
+    Err("downloads are disabled in this internal build".into())
 }
 
 fn prepare_macos_bundle(app: &Path, signature: &std::process::Output) -> Result<(), String> {
@@ -367,12 +360,9 @@ pub(crate) fn sha256(bytes: &[u8]) -> String {
     sha2::Sha256::digest(bytes).iter().map(|b| format!("{b:02x}")).collect()
 }
 
+/// INTERNAL BUILD: never fetches anything.
 fn curl_text(url: &str) -> Result<String, String> {
-    let out = crate::spawn::command(system("curl")).args(["-fsSL", "--max-time", "30", url]).stdin(Stdio::null()).output().map_err(|e| format!("curl: {e}"))?;
-    if !out.status.success() {
-        return Err(format!("{url}: {}", String::from_utf8_lossy(&out.stderr).trim()));
-    }
-    String::from_utf8(out.stdout).map_err(|e| e.to_string())
+    Err(format!("{url}: downloads are disabled in this internal build"))
 }
 
 fn run(cmd: &mut Command) -> Result<(), String> {
@@ -593,6 +583,10 @@ fn marker() -> PathBuf {
 /// path. A core a package manager owns is left alone (hc says so).
 pub fn after_update() {
     if std::fs::remove_file(marker()).is_err() {
+        return;
+    }
+    // INTERNAL BUILD: never checks or updates the core after an app update.
+    if !ONLINE {
         return;
     }
     std::thread::spawn(|| {

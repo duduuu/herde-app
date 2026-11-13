@@ -9,10 +9,10 @@ const I = (name) => `frame/settings/${name}.svg`;
 const SECTIONS = [
   { id: "look", title: "Look", icon: "palette" },
   ...(window()?.platform === "macos" ? [{ id: "keyboard", title: "Keyboard", icon: "keyboard" }] : []),
-  { id: "machines", title: "Machines", icon: "server" },
+  // INTERNAL BUILD: no Machines (remote machines are off) and no Privacy
+  // (telemetry is off); Updates only shows the versions.
   { id: "alerts", title: "Alerts", icon: "bell" },
-  { id: "updates", title: "Updates", icon: "refresh" },
-  { id: "privacy", title: "Privacy", icon: "shield" },
+  { id: "updates", title: "About", icon: "refresh" },
 ];
 
 const LOOKS = { main: "Herdr", terminals: "Terminals", win98: "Herdr 98" };
@@ -711,60 +711,18 @@ export default class Settings extends View {
 
   // Updates --------------------------------------------------------------
 
+  // INTERNAL BUILD: versions only. Nothing checks for or downloads updates;
+  // your organization distributes new builds.
   updates(t) {
     const u = updates();
-    const at = (secs) => {
-      const d = new Date(secs * 1000);
-      return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-    };
-    const checked = u.checked ? ` Checked at ${at(u.checked)}.` : "";
-    const result = u.checking ? "Checking\u2026" : u.checked
-      ? `Up to date.${checked}`
-      : "No successful check. Check your connection and try again.";
-    // Pressed: "Checking\u2026" while it looks, then "Up to date" for a moment
-    // (a find changes the row instead). One per row: an element shows once.
-    const asked = this.asked && Date.now() - this.asked < 3000;
-    const check = (id) =>
-      !u.checks
-        ? null
-        : u.checking && this.asked
-          ? div().px(12).py(5).text_size(13).text_color(t.dim).child("Checking\u2026")
-          : asked && u.checked && !u.checking
-            ? div().px(12).py(5).text_size(13).text_color(t.ansi2).child("\u2713 Up to date")
-            : this.button(t, id, "Check now", (_e, cx) => {
-                this.asked = Date.now();
-                run("app.check_updates");
-                cx.notify();
-              });
-    const primary = (id, label, f) =>
-      div().id(id).px(12).py(5).rounded(7).cursor_pointer().bg(t.accent).text_color(t.accent_foreground).text_size(13).font_semibold().hover((s) => s.opacity(0.9)).on_click(f).child(label);
-    const app = !u.app.updates
-      ? ["A build from source: it updates with git, not here.", null]
-      : u.app.ready
-        ? [`${u.app.ready} is ready. Restart to switch now; it also switches when you quit.`, primary("st-app-update", "Restart to update", () => run("app.update"))]
-        : [result, check("st-check-app")];
-    const c = u.core;
-    const core = c.managed
-      ? [`Managed by ${c.managed}: update it there.`, null]
-      : c.updating
-        ? ["Updating\u2026 your terminals keep running.", null]
-        : c.error
-          ? [`The update failed: ${c.error}`, primary("st-core-retry", "Try again", () => run("app.update_core"))]
-          : c.ready
-            ? [`${c.ready} is ready. Your terminals keep running through it.`, primary("st-core-update", "Update herdr-core", () => run("app.update_core"))]
-            : u.checks
-              ? [result, check("st-check-core")]
-              : ["Not checked: a build from source looks for no updates.", null];
     return v_flex()
       .w_full()
       .child(this.heading(t, "Herdr"))
-      .child(this.row(t, `Herdr ${u.app.version}`, app[0], h_flex().gap(8).flex_none()
-        .child(this.button(t, "st-whats-new", "What's new", () => { closeOverlay(props()?.overlay); run("app.whats_new"); }))
-        .when(Boolean(app[1]), (el) => el.child(app[1]))))
+      .child(this.row(t, `Herdr ${u.app.version}`, "Internal build. New versions come from your organization's distribution.", h_flex().gap(8).flex_none()
+        .child(this.button(t, "st-whats-new", "What's new", () => { closeOverlay(props()?.overlay); run("app.whats_new"); }))))
       .child(div().h(18))
       .child(this.heading(t, "herdr-core"))
-      .child(this.row(t, `herdr-core ${c.version ?? ""}`, core[0], core[1] ?? div()))
-      .child(div().pt(12).text_size(12.5).line_height("18px").text_color(t.dim).child("Herdr looks for both every hour and tells you in the corner. herdr-core runs your terminals, so they keep running through its updates."));
+      .child(this.row(t, `herdr-core ${u.core.version ?? ""}`, "Installed and updated with Herdr by your organization's distribution.", div()));
   }
 
 
@@ -904,7 +862,8 @@ export default class Settings extends View {
         cx.stop_propagation();
         cx.notify();
       })
-      .child(nav.h_full().child(div().flex_1()).child(this.button(t, "st-feedback", "Send feedback", () => { closeOverlay(props()?.overlay); run("app.feedback"); })))
+      // INTERNAL BUILD: no Send feedback button; feedback is never sent.
+      .child(nav.h_full().child(div().flex_1()))
       .child(
         // A bar that always shows: the pages are taller than the dialog and
         // people should see that they scroll.

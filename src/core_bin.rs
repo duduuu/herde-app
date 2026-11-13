@@ -170,6 +170,10 @@ fn login_shell_path() -> Option<std::ffi::OsString> {
 /// Installs the core's latest release with its own installer (into
 /// ~/.local/bin, or HC_INSTALL_DIR), then finds it. Err: what went wrong.
 pub fn install() -> Result<PathBuf, String> {
+    // INTERNAL BUILD: never runs the online installer; hc is distributed internally.
+    if !crate::update::ONLINE {
+        return Err("herdr-core is not installed. Install it from your internal distribution channel.".into());
+    }
     let releases = std::env::var("HERDR_RELEASES_URL").unwrap_or_else(|_| "https://releases.herdr.dev".into());
     let mut cmd = if cfg!(windows) {
         let mut c = crate::spawn::command("powershell");
@@ -206,6 +210,11 @@ pub fn update() -> Result<String, String> {
 
 /// `hc update --version X`: at least X (a newer core stays). Cores before 0.1.5 lack it.
 pub fn update_to(at_least: Option<&str>) -> Result<String, String> {
+    // INTERNAL BUILD: never asks hc to update itself (it would download a release).
+    if !crate::update::ONLINE {
+        let _ = at_least;
+        return Err("herdr-core updates come from your organization's distribution in this internal build.".into());
+    }
     let mut cmd = crate::spawn::command(path());
     cmd.args(["update", "--json"]);
     if let Some(v) = at_least {
@@ -257,6 +266,10 @@ fn ensure_core_bundle(version: &str) -> Result<(), String> {
         .args(["--verify", "--strict", "-R", "=identifier \"dev.herdr.core\" and anchor apple generic and certificate leaf[subject.OU] = \"2W9652Q7QR\""])
         .arg(&bin).output().is_ok_and(|out| out.status.success());
     if !official {
+        return Ok(());
+    }
+    // INTERNAL BUILD: never downloads the core bundle.
+    if !crate::update::ONLINE {
         return Ok(());
     }
     let releases = std::env::var("HERDR_RELEASES_URL").unwrap_or_else(|_| "https://releases.herdr.dev".into());

@@ -144,8 +144,9 @@ capture or permissions. It needs a running window that has drawn a frame;
 
 ## Problems and safety
 
-If Herdr misbehaves, `herdr-app feedback "<what happened>"` drafts a report.
-The person reviews and sends it; it does not silently send feedback.
+This internal build sends no feedback: `herdr-app feedback` is disabled. If
+Herdr misbehaves, tell the person what happened so they can report it
+through your organization's channel.
 
 Never experiment with pointer/key automation on the person's real display.
 When developing the app on Linux, its `scripts/sandbox` provides an isolated

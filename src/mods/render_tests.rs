@@ -646,45 +646,6 @@ fn rebuilt_machine_offers_connect_only_for_identity_mismatch(cx: &mut TestAppCon
 }
 
 #[gpui::test]
-fn machine_picker_keeps_long_lists_scrollable(cx: &mut TestAppContext) {
-    cx.update(gpui_shell::init);
-    let staged = Staged::new();
-    let tree = describe(
-        cx, &staged, "mods/machine-add", false, props(), updates("current", "current"),
-        Some("this.hosts = Array.from({length: 30}, (_, i) => ({alias: `host-${i}`, aliases: []}));"),
-    ).unwrap();
-    let scroll = tree.lines().find(|line| line.contains("ma-hosts")).unwrap();
-    assert!(scroll.contains("overflow_y_scroll") && !scroll.contains("overflow_y_scrollbar"), "{tree}");
-    assert!(scroll.contains(".min_h[Number(0.0)]"), "{tree}");
-    assert!(tree.contains("ma-row-host-29"), "{tree}");
-    assert_eq!(tree.matches(".flex_none").count(), 60, "rows must not shrink into the viewport: {tree}");
-}
-
-#[gpui::test]
-fn machine_add_needing_input_keeps_the_picker_and_shows_instructions(cx: &mut TestAppContext) {
-    cx.update(gpui_shell::init);
-    let staged = Staged::new();
-    let calls = Rc::new(RefCell::new(Calls::default()));
-    let policy = Policy::new().with_host_module(module(fixture(false, props(), updates("current", "current")), calls.clone())).unwrap();
-    let root = staged.wrapper("mods/machine-add", "this.typed = 'host'; this.add('host', cx);");
-    let window = cx.add_window(|_, _| Empty);
-    let mut session = window.update(cx, |_, window, cx| {
-        DescriptionSession::load(ShellRuntime::new_isolated().unwrap(), root, policy, window, cx).unwrap()
-    }).unwrap();
-    cx.run_until_parked();
-    window.update(cx, |_, window, cx| {
-        let tree = session.describe(window, cx).unwrap();
-        assert!(tree.contains("machine-add"), "{tree}");
-        assert!(tree.contains("ma-message-host"), "{tree}");
-        assert!(tree.contains("hc machine add host"), "{tree}");
-        window.remove_window();
-    }).unwrap();
-    let calls = calls.borrow();
-    assert!(calls.unexpected.is_empty(), "{:?}", calls.unexpected);
-    assert!(!calls.effects.iter().any(|(name, _)| name == "openOverlay" || name == "closeOverlay"), "the picker stays open without a setup dialog");
-}
-
-#[gpui::test]
 fn option_key_settings_are_only_shown_on_macos(cx: &mut TestAppContext) {
     cx.update(gpui_shell::init);
     let staged = Staged::new();
@@ -706,46 +667,32 @@ fn settings_sections_and_updates(cx: &mut TestAppContext) {
     cx.update(gpui_shell::init);
     let start = Instant::now();
     let staged = Staged::new();
-    for section in ["look", "alerts", "privacy", "updates"] {
+    for section in ["look", "alerts", "updates"] {
         let mut p = props();
         p["section"] = json!(section);
         describe(cx, &staged, "frame/settings", true, p, updates("current", "current"), None).unwrap();
     }
+    // INTERNAL BUILD: no Machines or Privacy sections; asking for one opens Look.
+    for section in ["machines", "privacy"] {
+        let mut p = props();
+        p["section"] = json!(section);
+        let tree = describe(cx, &staged, "frame/settings", true, p, updates("current", "current"), None).unwrap();
+        assert!(!tree.contains(&format!("st-s-{section}")), "{section} must not be listed: {tree}");
+    }
+    // INTERNAL BUILD: the About page shows versions only, never update controls.
     for app in ["source", "current", "ready"] {
         for core in ["current", "ready", "error", "managed", "updating"] {
             let mut p = props();
             p["section"] = json!("updates");
             let tree = describe(cx, &staged, "frame/settings", true, p, updates(app, core), None)
                 .unwrap_or_else(|e| panic!("updates/{app}/{core}: {e:#}"));
-            if app == "current" && core == "current" {
-                assert!(
-                    tree.contains("check-app") && tree.contains("check-core"),
-                    "both update buttons must exist: {tree}"
-                );
+            assert!(tree.contains("Internal build") && tree.contains("st-whats-new"), "updates/{app}/{core}: {tree}");
+            for id in ["check-app", "check-core", "st-app-update", "st-core-update", "st-core-retry", "st-feedback"] {
+                assert!(!tree.contains(id), "updates/{app}/{core} must not show {id}: {tree}");
             }
         }
     }
-    for (checking, checked, asked) in [
-        (false, None, false), (false, None, true),
-        (true, None, false), (true, None, true),
-        (true, Some(1700000000u64), false), (true, Some(1700000000), true),
-        (false, Some(1700000000), false), (false, Some(1700000000), true),
-    ] {
-        let mut p = props();
-        p["section"] = json!("updates");
-        let mut u = updates("current", "current");
-        u["checked"] = json!(checked);
-        u["checking"] = json!(checking);
-        let setup = asked.then_some("this.asked = Date.now();");
-        let tree = describe(cx, &staged, "frame/settings", true, p, u, setup).unwrap();
-        let succeeded = !checking && checked.is_some();
-        assert_eq!(tree.contains("Up to date"), succeeded, "success requires a completed, successful check: {tree}");
-        if !checking && checked.is_none() {
-            assert!(tree.contains("check-app") && tree.contains("check-core"), "failed checks must remain retryable: {tree}");
-        }
-        assert!(tree.contains(if checking { "Checking" } else if succeeded { "Up to date" } else { "Check your connection" }), "check status missing: {tree}");
-    }
-    eprintln!("27 settings cases, each twice: {:?}", start.elapsed());
+    eprintln!("20 settings cases, each twice: {:?}", start.elapsed());
 }
 
 #[gpui::test]
@@ -847,7 +794,8 @@ fn settings_keep_notes_in_the_whats_new_window(cx: &mut TestAppContext) {
     let mut p = props();
     p["section"] = json!("updates");
     let tree = describe(cx, &staged, "frame/settings", true, p, update.clone(), None).unwrap();
-    assert!(tree.contains("st-whats-new") && tree.contains("st-app-update") && tree.contains("st-check-core"));
+    // INTERNAL BUILD: no update buttons, only What's new.
+    assert!(tree.contains("st-whats-new") && !tree.contains("st-app-update") && !tree.contains("st-check-core"));
     assert!(!tree.contains("Newest details") && !tree.contains("Older headline"));
     let mut p = props();
     p["notes"] = notes;
@@ -862,7 +810,7 @@ fn local_state_and_overlay_initial_descriptions(cx: &mut TestAppContext) {
     cx.update(gpui_shell::init);
     let start = Instant::now();
     let staged = Staged::new();
-    for page in 1..=4 {
+    for page in 1..=3 {
         let tree = describe(
             cx,
             &staged,
@@ -873,7 +821,8 @@ fn local_state_and_overlay_initial_descriptions(cx: &mut TestAppContext) {
             Some(&format!("this.page = {page};")),
         )
         .unwrap();
-        let expected = ["Herdr runs your terminals in the background", "Add your other machines", "Choose your panels", "Make it yours"][page - 1];
+        // INTERNAL BUILD: no "Add your other machines" page.
+        let expected = ["Herdr runs your terminals in the background", "Choose your panels", "Make it yours"][page - 1];
         assert!(tree.contains(expected), "welcome page {page}: {tree}");
     }
     for setup in ["", "this.sent = true;", "this.error = 'Fixture error';"] {

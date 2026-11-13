@@ -389,7 +389,8 @@ pub struct Person {
     #[serde(skip_serializing_if = "is_true")]
     pub telemetry: bool,
     /// Allow terminal programs (including remote ones) to copy text locally.
-    #[serde(skip_serializing_if = "is_true")]
+    /// INTERNAL BUILD: off unless set to true.
+    #[serde(skip_serializing_if = "is_false")]
     pub clipboard_write: bool,
     /// A draggable scroll position thumb at a terminal pane's right edge.
     #[serde(skip_serializing_if = "is_true")]
@@ -444,6 +445,10 @@ fn is_true(b: &bool) -> bool {
     *b
 }
 
+fn is_false(b: &bool) -> bool {
+    !*b
+}
+
 impl Default for Person {
     fn default() -> Self {
         Person {
@@ -455,7 +460,7 @@ impl Default for Person {
             font_ligatures: false,
             ui_font: None,
             telemetry: true,
-            clipboard_write: true,
+            clipboard_write: false,
             pane_scrollbars: true,
             minimum_contrast: 1.0,
             option_as_alt: OptionAsAlt::Auto,
@@ -535,7 +540,7 @@ impl Default for Settings {
             pane_scrollbars: true,
             terminal_padding: [10.0, 6.0],
             terminal_opacity: 1.0,
-            clipboard_write: true,
+            clipboard_write: false,
             minimum_contrast: 1.0,
             option_as_alt: OptionAsAlt::Auto,
             sounds: Sounds::default(),
@@ -910,12 +915,13 @@ mod tests {
     }
 
     #[test]
-    fn program_clipboard_writes_default_on_and_can_be_disabled() {
+    fn program_clipboard_writes_default_off_and_can_be_enabled() {
         let default: Person = serde_json::from_str("{}").unwrap();
-        assert!(default.clipboard_write);
-        let off: Person = serde_json::from_str(r#"{"clipboard_write":false}"#).unwrap();
-        assert!(!Settings::compose(&off, &crate::layout::Look::default(), true).clipboard_write);
-        assert_eq!(serde_json::to_value(off).unwrap()["clipboard_write"], false);
+        assert!(!default.clipboard_write);
+        assert!(!Settings::default().clipboard_write);
+        let on: Person = serde_json::from_str(r#"{"clipboard_write":true}"#).unwrap();
+        assert!(Settings::compose(&on, &crate::layout::Look::default(), true).clipboard_write);
+        assert_eq!(serde_json::to_value(on).unwrap()["clipboard_write"], true);
     }
 
     #[test]
@@ -943,7 +949,7 @@ mod tests {
     /// settings.json key.
     #[test]
     fn the_guide_explains_every_setting() {
-        let all = Person { core: Some(String::new()), font: Some(String::new()), font_size: Some(1.0), ui_font: Some(String::new()), telemetry: false, clipboard_write: false, appearance: Appearance::Light, theme: Some(crate::layout::ThemeChoice::One(String::new())), colors: [("text".into(), String::new())].into(), ..Person::default() };
+        let all = Person { core: Some(String::new()), font: Some(String::new()), font_size: Some(1.0), ui_font: Some(String::new()), telemetry: false, clipboard_write: true, appearance: Appearance::Light, theme: Some(crate::layout::ThemeChoice::One(String::new())), colors: [("text".into(), String::new())].into(), ..Person::default() };
         let keys: Vec<String> = serde_json::to_value(&all).unwrap().as_object().unwrap().keys().cloned().collect();
         let guide = include_str!("../defaults/AGENTS.md");
         let section = guide.split("## The person").nth(1).and_then(|s| s.split("\n## ").next()).unwrap_or_default();

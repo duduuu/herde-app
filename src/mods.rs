@@ -1143,7 +1143,8 @@ fn capabilities() -> Capabilities {
         .read_roots([home()])
         .write_roots([app_dir()])
         .execute(ExecuteGrant::Unrestricted)
-        .network(NetworkGrant::Unrestricted)
+        // INTERNAL BUILD: mods may not reach the network.
+        .network(NetworkGrant::Denied)
         .storage(true)
         .clipboard_read(true)
         .clipboard_write(true)

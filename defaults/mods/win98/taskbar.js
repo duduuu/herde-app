@@ -22,7 +22,6 @@ const AGENTS = [
   ["cursor-agent", "Cursor", "icons/cursor.svg"],
   ["copilot", "Copilot", "icons/copilot.svg"],
   ["grok", "Grok", "icons/grok.svg"],
-  ["kimi", "Kimi", "icons/kimi.svg"],
   ["crush", "Crush", "icons/crush.svg"],
 ];
 

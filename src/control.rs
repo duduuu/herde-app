@@ -89,7 +89,8 @@ pub fn client(args: &[String]) -> i32 {
         },
         [verb] if verb == "status" => json!({ "status": true }),
         [verb] if verb == "ls" => json!({ "ls": true }),
-        [verb, message] if verb == "feedback" => json!({ "do": "app.feedback", "args": { "message": message, "from": "agent" } }),
+        // INTERNAL BUILD: feedback is never sent.
+        [verb, _message] if verb == "feedback" => return fail("feedback is disabled in this internal build"),
         [verb, command, rest @ ..] if verb == "do" => match parse_args(rest) {
             Ok(a) => json!({ "do": command, "args": a }),
             Err(e) => return fail(&e),
