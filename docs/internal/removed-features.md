@@ -1,7 +1,8 @@
-# Herdr 사내 빌드: 제거·차단 기능 목록
+# Herde: Herdr 대비 변경·제거 기능 목록
 
-Herdr 사내 빌드는 `herdr-app`(데스크톱 앱)과 `herdr-core`(`hc`, 터미널 런타임)를 포크해, 로컬 기능은 유지하고 외부로 나가는 경로를 막은 빌드다.
+Herde는 Herdr의 `herdr-app`(데스크톱 앱)과 `herdr-core`(`hc`, 터미널 런타임)를 포크해, 로컬 기능은 유지하고 외부로 나가는 경로를 막은 사내 빌드다.
 
+- 저장소: `duduuu/herde-app`, `duduuu/herde-core` (원본은 `upstream` remote, push 금지)
 - 브랜치: 두 저장소 모두 `internal`
 - 방식: **코드는 남기고 끈다.** 업스트림 동기화를 쉽게 하려고 대부분 상수 스위치로 막았다.
   - 앱: `src/update.rs`의 `pub const ONLINE: bool = false`
@@ -14,6 +15,7 @@ Herdr 사내 빌드는 `herdr-app`(데스크톱 앱)과 `herdr-core`(`hc`, 터�
 
 | 영역 | 처리 |
 |---|---|
+| 앱 이름·식별자 | Herdr → Herde (표시 이름·번들 ID만, CLI·폴더는 유지) |
 | 로컬 터미널, 탭·분할, 레이아웃, 에이전트 상태 표시, 로컬 git, 파일 패널 | 유지 |
 | mod (JS 확장) | 유지. 단, 네트워크 접근은 차단하고 **검토한 사내 mod만 설치**(운영 정책) |
 | 원격 머신 (SSH, `via`, 다른 코어의 접속) | 차단(코어). 앱 화면의 진입점 제거 |
@@ -25,6 +27,29 @@ Herdr 사내 빌드는 `herdr-app`(데스크톱 앱)과 `herdr-core`(`hc`, 터�
 | 터미널 OSC 52 클립보드 쓰기 | 기본 꺼짐(설정으로 켤 수 있음) |
 | 공개 릴리스 CI (R2 업로드, 서명·공증) | 워크플로 삭제 |
 | 외부 mod 공유 안내 (herdr.dev, 공개 GitHub) | 사내 저장소 안내로 교체 |
+
+## 0. 앱 이름과 식별자
+
+| 항목 | Herdr | Herde |
+|---|---|---|
+| 창 제목, macOS 메뉴(Hide/Quit), 화면 문구, 레이아웃 표시 이름 | Herdr | Herde |
+| macOS 앱 번들 / 실행 파일 | `Herdr.app` / `Contents/MacOS/Herdr` | `Herde.app` / `Contents/MacOS/Herde` |
+| 앱 번들 ID | `dev.herdr.app` | `dev.herde.app` |
+| 코어 표시 이름(권한 요청 창 등) / 번들 ID | Herdr Core / `dev.herdr.core` | Herde Core / `dev.herde.core` |
+| launchd 라벨 접두사 | `dev.herdr.core.` | `dev.herde.core.` |
+| DMG 볼륨 이름 | Herdr | Herde |
+
+- **바꾸지 않은 것:**
+  - CLI 이름 `herdr-app`, `hc`, `herdr-core`
+  - 폴더 `~/.config/herdr-app`, `~/.local/share/herdr-core`
+  - 코어 번들 폴더 이름 `Herdr Core.app`(설치 경로에 엮여 있음)
+  - 환경변수 `HERDR_*`, `HC_*`
+  - 단축키 컨텍스트 이름 `Herdr`
+  - 아이콘 파일 `Herdr.icns`와 로고
+  - 에이전트 문서(AGENTS.md, SKILL.md)의 Herdr 표기. 문서 앞머리에 Herde라는 안내만 추가
+- **공식 Herdr와 같은 컴퓨터에 함께 설치하는 것은 지원하지 않는다.** CLI 이름, 데이터 폴더, 소켓이 같아서 충돌한다. Herdr를 지운 뒤 Herde를 설치한다.
+- Windows 설치 스크립트(`distribution/install.ps1`)와 win98 레이아웃의 문구는 바꾸지 않았다.
+- macOS 코어 번들 서명 검사(`macos_bundle.rs`, `core_bin.rs`)에는 아직 Herdr의 Apple 팀 ID(`2W9652Q7QR`)가 남아 있다. 다운로드·업데이트 경로에서만 쓰여서 지금은 영향이 없지만, 사내 서명 팀 ID가 정해지면 함께 바꾼다.
 
 ## 1. 원격 머신
 

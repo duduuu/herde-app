@@ -71,13 +71,13 @@ pub struct Setup {
 pub fn open(need: Need, requests: async_channel::Receiver<Request>, cx: &mut App) {
     let options = WindowOptions {
         window_bounds: Some(WindowBounds::Windowed(Bounds::centered(None, size(px(620.0), px(460.0)), cx))),
-        titlebar: Some(TitlebarOptions { title: Some("Herdr".into()), ..Default::default() }),
+        titlebar: Some(TitlebarOptions { title: Some("Herde".into()), ..Default::default() }),
         app_id: Some("herdr-app".into()),
         ..Default::default()
     };
     let icon = Arc::new(Image::from_bytes(ImageFormat::Png, ICON.to_vec()));
     cx.open_window(options, |_, cx| cx.new(|_| Setup { need, state: State::Ready, requests: Some(requests), icon }))
-        .expect("cannot open the Herdr window");
+        .expect("cannot open the Herde window");
     cx.activate(true);
 }
 
@@ -162,29 +162,29 @@ impl Setup {
     fn words(&self) -> (String, String, String) {
         match &self.need {
             Need::Install => (
-                "Herdr needs herdr-core".into(),
-                "herdr-core runs your terminals and agents, and keeps them alive when this window closes. Herdr couldn't find it on this computer.".into(),
+                "Herde needs herdr-core".into(),
+                "herdr-core runs your terminals and agents, and keeps them alive when this window closes. Herde couldn't find it on this computer.".into(),
                 format!("To fix it, {CORE_INSTALL}."),
             ),
             Need::Connect(error) => (
-                "Herdr can't connect to herdr-core".into(),
+                "Herde can't connect to herdr-core".into(),
                 error.clone(),
                 "Once you've resolved this, try again.".into(),
             ),
             Need::Fix(Mismatch::TooOld { have, need }) => (
-                "Herdr needs a newer herdr-core".into(),
-                format!("Yours is {have}; this Herdr needs {need} or newer. Updating keeps your terminals running."),
+                "Herde needs a newer herdr-core".into(),
+                format!("Yours is {have}; this Herde needs {need} or newer. Updating keeps your terminals running."),
                 format!("To update it, {CORE_INSTALL}."),
             ),
             Need::Fix(Mismatch::Missing(methods)) => (
-                "Herdr needs a newer herdr-core".into(),
-                format!("Your herdr-core can't do everything this Herdr needs ({}). Updating keeps your terminals running.", methods.join(", ")),
+                "Herde needs a newer herdr-core".into(),
+                format!("Your herdr-core can't do everything this Herde needs ({}). Updating keeps your terminals running.", methods.join(", ")),
                 format!("To update it, {CORE_INSTALL}."),
             ),
             Need::Fix(Mismatch::Newer { generation }) => (
-                "This Herdr is older than your herdr-core".into(),
-                format!("Your herdr-core speaks a newer protocol (generation {generation}) than this Herdr understands. Update Herdr; your terminals keep running."),
-                format!("To update Herdr, {APP_INSTALL}."),
+                "This Herde is older than your herdr-core".into(),
+                format!("Your herdr-core speaks a newer protocol (generation {generation}) than this Herde understands. Update Herde; your terminals keep running."),
+                format!("To update Herde, {APP_INSTALL}."),
             ),
         }
     }

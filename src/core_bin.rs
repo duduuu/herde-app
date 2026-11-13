@@ -263,7 +263,7 @@ fn ensure_core_bundle(version: &str) -> Result<(), String> {
     }
     // Never replace a contributor's build, package-manager core, or a host app.
     let official = crate::spawn::command("/usr/bin/codesign")
-        .args(["--verify", "--strict", "-R", "=identifier \"dev.herdr.core\" and anchor apple generic and certificate leaf[subject.OU] = \"2W9652Q7QR\""])
+        .args(["--verify", "--strict", "-R", "=identifier \"dev.herde.core\" and anchor apple generic and certificate leaf[subject.OU] = \"2W9652Q7QR\""])
         .arg(&bin).output().is_ok_and(|out| out.status.success());
     if !official {
         return Ok(());

@@ -283,7 +283,7 @@ impl Drop for Job {
 fn submit(args: &[String]) -> io::Result<i32> {
     let mut interrupts = Some(Interrupts::install()?);
     let stamp = SystemTime::now().duration_since(UNIX_EPOCH).map_err(io::Error::other)?.as_nanos();
-    let label = format!("dev.herdr.check.{}.{stamp}", std::process::id());
+    let label = format!("dev.herde.check.{}.{stamp}", std::process::id());
     let domain = format!("gui/{}", unsafe { libc::getuid() });
     let dir = PathBuf::from(format!("/tmp/herdr-check-{}-{stamp}", std::process::id()));
     fs::DirBuilder::new().mode(0o700).create(&dir)?;
@@ -433,7 +433,7 @@ mod tests {
             return;
         }
         let stamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
-        let label = format!("dev.herdr.check.test.{}.{stamp}", std::process::id());
+        let label = format!("dev.herde.check.test.{}.{stamp}", std::process::id());
         let dir = PathBuf::from(format!("/var/tmp/herdr-check-test-{stamp}"));
         fs::DirBuilder::new().mode(0o700).create(&dir).unwrap();
         let mut job = Job { dir, target: format!("{domain}/{label}"), loaded: false, handed_off: false };

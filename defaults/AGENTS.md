@@ -24,7 +24,12 @@ from the same parts you have.
 
 `herdr-app` controls this app; `hc` controls herdr-core.
 
-**This is an internal build.** It reaches nothing outside this computer:
+**This is Herde, an internal build of Herdr.** The window, menus and
+macOS app are called Herde (`Herde.app`, bundle ID `dev.herde.app`; the
+core shows as Herde Core, `dev.herde.core`). Everything else keeps Herdr's
+names: the `herdr-app` and `hc` commands, `~/.config/herdr-app`, `HERDR_*`
+variables, and this guide's wording. Herde and an official Herdr can't be
+installed on the same computer. It reaches nothing outside this computer:
 other machines (ssh, `hc machine`, `on`) are off, nothing checks for or
 downloads updates, no usage data or feedback is sent, and mods have no
 network access. Where this guide describes those features, they fail here;

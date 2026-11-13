@@ -15,7 +15,7 @@ const SECTIONS = [
   { id: "updates", title: "About", icon: "refresh" },
 ];
 
-const LOOKS = { main: "Herdr", terminals: "Terminals", win98: "Herdr 98" };
+const LOOKS = { main: "Herde", terminals: "Terminals", win98: "Herdr 98" };
 const APPEARANCES = [
   [null, "System"],
   ["light", "Light"],
@@ -692,7 +692,7 @@ export default class Settings extends View {
   alerts(t) {
     const sounds = this.person.sounds ?? {};
     const on = sounds.enabled !== false;
-    const file = (f) => (f ? f.split(/[\\/]/).pop() : "Herdr's sound");
+    const file = (f) => (f ? f.split(/[\\/]/).pop() : "Herde's sound");
     return v_flex()
       .w_full()
       .child(this.heading(t, "Sounds"))
@@ -717,12 +717,12 @@ export default class Settings extends View {
     const u = updates();
     return v_flex()
       .w_full()
-      .child(this.heading(t, "Herdr"))
-      .child(this.row(t, `Herdr ${u.app.version}`, "Internal build. New versions come from your organization's distribution.", h_flex().gap(8).flex_none()
+      .child(this.heading(t, "Herde"))
+      .child(this.row(t, `Herde ${u.app.version}`, "Internal build. New versions come from your organization's distribution.", h_flex().gap(8).flex_none()
         .child(this.button(t, "st-whats-new", "What's new", () => { closeOverlay(props()?.overlay); run("app.whats_new"); }))))
       .child(div().h(18))
       .child(this.heading(t, "herdr-core"))
-      .child(this.row(t, `herdr-core ${u.core.version ?? ""}`, "Installed and updated with Herdr by your organization's distribution.", div()));
+      .child(this.row(t, `herdr-core ${u.core.version ?? ""}`, "Installed and updated with Herde by your organization's distribution.", div()));
   }
 
 
@@ -755,7 +755,7 @@ export default class Settings extends View {
     const s = telemetry();
     const on = s ? s.setting : this.person.telemetry !== false;
     const at = (secs) => new Date(secs * 1000).toLocaleString();
-    const why = s?.off_because ? `Off for now: ${s.off_because} is set where Herdr started.` : null;
+    const why = s?.off_because ? `Off for now: ${s.off_because} is set where Herde started.` : null;
     const body = v_flex()
       .w_full()
       .child(this.heading(t, "Usage data"))
@@ -763,7 +763,7 @@ export default class Settings extends View {
         this.row(
           t,
           "Share anonymous usage data",
-          why ?? "Once a day: which agents and features you use, how many spaces and tabs, your system and Herdr's version. Never what's in your terminals, never names of files, folders or projects.",
+          why ?? "Once a day: which agents and features you use, how many spaces and tabs, your system and Herde's version. Never what's in your terminals, never names of files, folders or projects.",
           this.toggle(t, "st-telemetry", on, (_e, cx) =>
             this.change((p) => {
               if (on) p.telemetry = false;

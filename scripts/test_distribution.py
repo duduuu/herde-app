@@ -74,7 +74,7 @@ done
 exit 97''')
                 result = self.run_script("distribution/install.sh", "Darwin", "x86_64")
                 self.assertEqual(result.returncode, 1)
-                self.assertIn("Installing Herdr test for macos-aarch64", result.stdout)
+                self.assertIn("Installing Herde test for macos-aarch64", result.stdout)
                 self.assertIn("download is damaged", result.stderr)
                 self.assertNotIn("Intel Macs", result.stderr)
 
@@ -122,13 +122,13 @@ exit 22''')
         home = self.bin / "home"
         (home / ".local/bin").mkdir(parents=True)
         (home / ".local/bin/herdr-core").touch()
-        source = self.bin / "source/Herdr.app/Contents"
+        source = self.bin / "source/Herde.app/Contents"
         source.mkdir(parents=True)
         plist = b"signed release plist must stay unchanged"
         (source / "Info.plist").write_bytes(plist)
         archive = self.bin / "release.tar.gz"
         with tarfile.open(archive, "w:gz") as tar:
-            tar.add(source.parent, arcname="Herdr.app")
+            tar.add(source.parent, arcname="Herde.app")
         sha = hashlib.sha256(archive.read_bytes()).hexdigest()
         manifest = self.bin / "manifest.json"
         manifest.write_text('{"version":"1.0.0","targets":{"macos-aarch64":{"url":"release","sha256":"%s"}}}' % sha)
@@ -138,7 +138,7 @@ for a; do
   prev=$a
 done
 case $url in */latest.json) cp "{manifest}" "$out" ;; release) cp "{archive}" "$out" ;; *) exit 97 ;; esac''')
-        installed = home / "Applications/Herdr.app/Contents/Info.plist"
+        installed = home / "Applications/Herde.app/Contents/Info.plist"
         installed.parent.mkdir(parents=True)
         installed.write_bytes(b"previous installed app")
         fixture = self.bin / "signature.txt"
@@ -246,7 +246,7 @@ printf 'dev PATH added' >> "$3"''')
         self.stub("cargo", "exit 0")
         for os_name, arch, target, prefix in (
             ("Linux", "x86_64", "linux-x86_64", "herdr-app"),
-            ("Darwin", "arm64", "macos-aarch64", "Herdr.app/Contents/Resources"),
+            ("Darwin", "arm64", "macos-aarch64", "Herde.app/Contents/Resources"),
             ("MINGW64_NT", "x86_64", "windows-x86_64", "herdr-app"),
         ):
             with self.subTest(target=target):

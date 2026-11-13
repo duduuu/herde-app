@@ -5,7 +5,7 @@
 #   scripts/package <triple>   -> the same for another supported Rust target
 #
 # Linux: a folder holding herdr-app and the icon.
-# macOS: Herdr.app, signed with APPLE_CERTIFICATE_P12 when available,
+# macOS: Herde.app, signed with APPLE_CERTIFICATE_P12 when available,
 # otherwise ad hoc. The notarized DMG is a separate, non-blocking CI job.
 # Windows (Git Bash): a folder holding herdr-app.exe and the icon.
 # Windows has curl and tar too, so the app updates the same way.
@@ -70,33 +70,33 @@ if [[ $os == linux || $os == windows ]]; then
   notices_path=herdr-app/THIRD-PARTY-NOTICES
   tar -czf "$out" -C "$work" herdr-app
 else
-  app="$work/Herdr.app"
+  app="$work/Herde.app"
   mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
-  cp "$bin/herdr-app" "$app/Contents/MacOS/Herdr"
+  cp "$bin/herdr-app" "$app/Contents/MacOS/Herde"
   cp assets/icons/Herdr.icns "$app/Contents/Resources/Herdr.icns"
   cp LICENSE THIRD-PARTY-NOTICES "$app/Contents/Resources/"
-  notices_path=Herdr.app/Contents/Resources/THIRD-PARTY-NOTICES
+  notices_path=Herde.app/Contents/Resources/THIRD-PARTY-NOTICES
   cat > "$app/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
-    <key>CFBundleExecutable</key><string>Herdr</string>
-    <key>CFBundleIdentifier</key><string>dev.herdr.app</string>
-    <key>CFBundleName</key><string>Herdr</string>
-    <key>CFBundleDisplayName</key><string>Herdr</string>
+    <key>CFBundleExecutable</key><string>Herde</string>
+    <key>CFBundleIdentifier</key><string>dev.herde.app</string>
+    <key>CFBundleName</key><string>Herde</string>
+    <key>CFBundleDisplayName</key><string>Herde</string>
     <key>CFBundleIconFile</key><string>Herdr</string>
     <key>CFBundlePackageType</key><string>APPL</string>
     <key>CFBundleShortVersionString</key><string>$version</string>
     <key>CFBundleVersion</key><string>$version</string>
-    <key>NSMicrophoneUsageDescription</key><string>Terminal programs running in Herdr can use the microphone, for example for voice input.</string>
-    <key>NSCameraUsageDescription</key><string>Terminal programs running in Herdr can use the camera.</string>
-    <key>NSAppleEventsUsageDescription</key><string>Terminal programs running in Herdr can use AppleScript to control other apps.</string>
+    <key>NSMicrophoneUsageDescription</key><string>Terminal programs running in Herde can use the microphone, for example for voice input.</string>
+    <key>NSCameraUsageDescription</key><string>Terminal programs running in Herde can use the camera.</string>
+    <key>NSAppleEventsUsageDescription</key><string>Terminal programs running in Herde can use AppleScript to control other apps.</string>
     <key>NSPrincipalClass</key><string>NSApplication</string>
     <key>NSHighResolutionCapable</key><true/>
     <key>LSEnvironment</key><dict/></dict></plist>
 PLIST
   scripts/mac-sign "$app"
-  tar -czf "$out" -C "$work" Herdr.app
+  tar -czf "$out" -C "$work" Herde.app
 fi
 tar -xOf "$out" "$notices_path" | cmp - THIRD-PARTY-NOTICES
 license_path="${notices_path%/*}/LICENSE"

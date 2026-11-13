@@ -1,10 +1,10 @@
 #!/bin/sh
-# Installs the Herdr app, and herdr-core if there's none yet:
+# Installs the Herde app, and herdr-core if there's none yet:
 #
 #   curl -fsSL https://releases.herdr.dev/app/install.sh | sh
 #
 # Linux: the app into ~/.local/share/herdr-app, `herdr-app` in ~/.local/bin,
-# a launcher entry and icon. macOS: Herdr.app into ~/Applications, keeping
+# a launcher entry and icon. macOS: Herde.app into ~/Applications, keeping
 # its release signature intact (ad hoc for unsigned/dev builds). The core, with its
 # own installer, into ~/.local/bin/herdr-core (and `hc`) only if none is
 # there yet; the app
@@ -63,7 +63,7 @@ version=$(tr -d '\n ' < "$tmp/latest.json" | sed -n 's/^{"version":"\([^"]*\)".*
 # use are marked: one with a query or fragment (a mirror's signed URL) is
 # fetched exactly as the manifest gives it.
 src=install
-for have in "${XDG_DATA_HOME:-$HOME/.local/share}/herdr-app" "$HOME/Applications/Herdr.app" /Applications/Herdr.app; do
+for have in "${XDG_DATA_HOME:-$HOME/.local/share}/herdr-app" "$HOME/Applications/Herde.app" /Applications/Herde.app; do
   if [ -e "$have" ]; then src=reinstall; fi
 done
 case $url in
@@ -72,7 +72,7 @@ case $url in
   *) download=$url ;;
 esac
 
-say "Installing Herdr ${version:-} for $target..."
+say "Installing Herde ${version:-} for $target..."
 curl -fsSL "$download" -o "$tmp/app.tar.gz" || fail "download failed"
 [ "$(sha256 "$tmp/app.tar.gz")" = "$want" ] || fail "download is damaged (checksum mismatch); try again"
 tar -xzf "$tmp/app.tar.gz" -C "$tmp"
@@ -92,7 +92,7 @@ if [ "$os" = linux ]; then
   cat > "$data/applications/herdr-app.desktop" <<EOF
 [Desktop Entry]
 Type=Application
-Name=Herdr
+Name=Herde
 Comment=Terminals and coding agents that keep running
 Exec=$bin/herdr-app
 Icon=herdr-app
@@ -108,14 +108,14 @@ EOF
     dbus-send --session --type=signal /KIconLoader org.kde.KIconLoader.iconChanged int32:0 2>/dev/null || true
 else
   apps="$HOME/Applications"
-  app="$apps/Herdr.app"
+  app="$apps/Herde.app"
   mkdir -p "$apps"
   # Prepared in the temp folder, so Spotlight never indexes a half-made
   # bundle under a temporary name in Applications.
   # Never change a certificate-signed bundle: macOS permissions follow its
   # signing identity. Only unsigned/ad-hoc development builds need this PATH.
   signed=false
-  if signature=$(/usr/bin/codesign -dvv "$tmp/Herdr.app" 2>&1); then
+  if signature=$(/usr/bin/codesign -dvv "$tmp/Herde.app" 2>&1); then
     if printf '%s\n' "$signature" | grep -q '^Authority=Developer ID Application:'; then
       signed=true
     elif ! printf '%s\n' "$signature" | grep -qx 'Signature=adhoc'; then
@@ -125,24 +125,24 @@ else
     fail "cannot determine app signature: $signature"
   fi
   if [ "$signed" = true ]; then
-    /usr/bin/codesign --verify --deep --strict "$tmp/Herdr.app" || fail "invalid app signature"
+    /usr/bin/codesign --verify --deep --strict "$tmp/Herde.app" || fail "invalid app signature"
   else
-    /usr/libexec/PlistBuddy -c "Add :LSEnvironment:PATH string $bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin" "$tmp/Herdr.app/Contents/Info.plist"
-    /usr/bin/codesign --force --sign - "$tmp/Herdr.app" >/dev/null 2>&1
+    /usr/libexec/PlistBuddy -c "Add :LSEnvironment:PATH string $bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin" "$tmp/Herde.app/Contents/Info.plist"
+    /usr/bin/codesign --force --sign - "$tmp/Herde.app" >/dev/null 2>&1
   fi
   rm -rf "$app"
-  mv "$tmp/Herdr.app" "$app"
-  ln -sfn "$app/Contents/MacOS/Herdr" "$bin/herdr-app"
+  mv "$tmp/Herde.app" "$app"
+  ln -sfn "$app/Contents/MacOS/Herde" "$bin/herdr-app"
   /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$app" 2>/dev/null || true
 fi
 
 # The core: installed only if there's none yet. One that's already there
 # (yours, or from a package manager) is left alone; the app updates it.
 if [ ! -e "$bin/herdr-core" ] && ! command -v herdr-core >/dev/null 2>&1; then
-  curl -fsSL "$releases/core/install.sh" | HC_INSTALL_DIR="$bin" HERDR_RELEASES_URL="$releases" sh || say "herdr-core didn't install; Herdr will offer it when it opens."
+  curl -fsSL "$releases/core/install.sh" | HC_INSTALL_DIR="$bin" HERDR_RELEASES_URL="$releases" sh || say "herdr-core didn't install; Herde will offer it when it opens."
 fi
 
-say "Herdr is installed. Open it from your apps, or run: herdr-app"
+say "Herde is installed. Open it from your apps, or run: herdr-app"
 case ":$PATH:" in
   *":$bin:"*) ;;
   *) say "Add $bin to your PATH to use herdr-app and hc from a terminal." ;;

@@ -1,5 +1,5 @@
 //! The app's own updates. An installed app (Linux: `~/.local/share/herdr-app`,
-//! macOS: `Herdr.app`) checks `releases.herdr.dev/app/latest.json` a little
+//! macOS: `Herde.app`) checks `releases.herdr.dev/app/latest.json` a little
 //! after it opens and every hour, downloads a newer build for this
 //! machine, checks its sha256 and unpacks it next to itself (`<install>.new`).
 //! The frame then shows "Restart"; the swap happens on restart or the next
@@ -8,7 +8,7 @@
 //!
 //! A build from source never updates: only `scripts/package` (the release
 //! builds) sets `HERDR_APP_RELEASE`. `scripts/install-macos` makes a
-//! Herdr.app too, so the install's shape alone can't tell.
+//! Herde.app too, so the install's shape alone can't tell.
 //!
 //! The core is checked on the same clock (`core/latest.json`): a newer core
 //! of the same generation is offered (also applied after an app update), unless
@@ -38,7 +38,7 @@ fn find_root() -> Option<PathBuf> {
     let exe = std::env::current_exe().ok()?.canonicalize().ok()?;
     let dir = exe.parent()?;
     if cfg!(target_os = "macos") {
-        // Herdr.app/Contents/MacOS/Herdr
+        // Herde.app/Contents/MacOS/Herde
         let bundle = dir.parent()?.parent()?;
         (bundle.extension()? == "app").then(|| bundle.to_path_buf())
     } else {
@@ -48,13 +48,13 @@ fn find_root() -> Option<PathBuf> {
 }
 
 /// The folder or bundle name inside a release tarball.
-const PACKED: &str = if cfg!(target_os = "macos") { "Herdr.app" } else { "herdr-app" };
+const PACKED: &str = if cfg!(target_os = "macos") { "Herde.app" } else { "herdr-app" };
 
 fn beside(root: &Path, suffix: &str) -> PathBuf {
     let mut name = root.file_name().unwrap_or_default().to_os_string();
     name.push(suffix);
     // macOS: Spotlight skips a folder ending in `.noindex`, so a staged
-    // `Herdr.app.new` never shows up in search under that name.
+    // `Herde.app.new` never shows up in search under that name.
     if cfg!(target_os = "macos") {
         name.push(".noindex");
     }
@@ -376,7 +376,7 @@ fn run(cmd: &mut Command) -> Result<(), String> {
 
 fn exe_in(app: &Path) -> PathBuf {
     if cfg!(target_os = "macos") {
-        app.join("Contents/MacOS/Herdr")
+        app.join("Contents/MacOS/Herde")
     } else {
         app.join(format!("herdr-app{}", std::env::consts::EXE_SUFFIX))
     }
@@ -540,7 +540,7 @@ fn relaunch_expected(expected: Option<&str>) -> bool {
     let Some(root) = root() else { return false };
     // LaunchServices need not preserve the startup guard or an isolated home.
     let open = if cfg!(target_os = "macos") {
-        if expected.is_some() { "exec \"$1/Contents/MacOS/Herdr\"" } else { "open \"$1\"" }
+        if expected.is_some() { "exec \"$1/Contents/MacOS/Herde\"" } else { "open \"$1\"" }
     } else {
         "exec \"$1/herdr-app\""
     };
@@ -746,7 +746,7 @@ mod tests {
         assert_eq!(release_signature(signature.status.success(), &String::from_utf8_lossy(&signature.stderr)), Ok(true));
         run(Command::new("/usr/bin/codesign").args(["--verify", "--deep", "--strict"]).arg(&app)).unwrap();
         run(Command::new("tar").arg("-xzf").arg(signed.join("app.tar.gz")).arg("-C").arg(&reference)).unwrap();
-        for file in ["Contents/Info.plist", "Contents/MacOS/Herdr", "Contents/_CodeSignature/CodeResources"] {
+        for file in ["Contents/Info.plist", "Contents/MacOS/Herde", "Contents/_CodeSignature/CodeResources"] {
             assert_eq!(std::fs::read(app.join(file)).unwrap(), std::fs::read(reference.join(PACKED).join(file)).unwrap(), "{file} was modified");
         }
         for kind in ["adhoc", "unsigned"] {
