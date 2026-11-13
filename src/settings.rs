@@ -98,9 +98,8 @@ const THEMES: &[(&str, &str)] = &[
     ("atom-one-dark", include_str!("../defaults/themes/atom-one-dark.json")),
     ("nord", include_str!("../defaults/themes/nord.json")),
     ("dracula", include_str!("../defaults/themes/dracula.json")),
-    ("win98", include_str!("../defaults/themes/win98.json")),
 ];
-pub const SHIPPED_THEMES: &[&str] = &["atom-one-dark", "nord", "dracula", "win98"];
+pub const SHIPPED_THEMES: &[&str] = &["atom-one-dark", "nord", "dracula"];
 
 /// `themes/<name>.json`: a palette, plus `colors` overrides like settings.json's.
 #[derive(Deserialize)]
@@ -130,36 +129,6 @@ const PREVIOUS_THEMES: &[(&str, &str)] = &[
     "#21252b", "#e06c75", "#98c379", "#e5c07b", "#61afef", "#c678dd", "#56b6c2", "#abb2bf",
     "#767676", "#e06c75", "#98c379", "#e5c07b", "#61afef", "#c678dd", "#56b6c2", "#abb2bf"
   ]
-}
-"##),
-    ("win98", r##"{
-  "background": "#ffffff",
-  "foreground": "#c0c0c0",
-  "selection": "#000080",
-  "cursor": "#c0c0c0",
-  "ansi": [
-    "#000000", "#aa0000", "#00aa00", "#aa5500", "#0000aa", "#aa00aa", "#00aaaa", "#aaaaaa",
-    "#555555", "#ff5555", "#55ff55", "#ffff55", "#5555ff", "#ff55ff", "#55ffff", "#ffffff"
-  ],
-  "colors": {
-    "foreground": "#000000",
-    "surface": "#c0c0c0",
-    "popover": "#c0c0c0",
-    "raised": "#dfdfdf",
-    "hover": "#dfdfdf",
-    "border": "#808080",
-    "input": "#ffffff",
-    "muted": "#404040",
-    "dim": "#808080",
-    "accent": "#000080",
-    "accent_foreground": "#ffffff",
-    "ring": "#000000",
-    "working": "#808000",
-    "blocked": "#ff0000",
-    "done": "#0000ff",
-    "idle": "#808080",
-    "unknown": "#808080"
-  }
 }
 "##),
 ];
@@ -781,7 +750,7 @@ pub fn note_fonts(names: Vec<String>) {
 }
 
 /// Font files the home brings: `fonts/` and each mod's `fonts/` (a layout's
-/// look travels with its mod, as Herdr 98's does). Loads the ones not loaded
+/// look travels with its mod). Loads the ones not loaded
 /// yet; true when any was.
 pub fn load_home_fonts(cx: &mut gpui::App) -> bool {
     static LOADED: Mutex<Vec<PathBuf>> = Mutex::new(Vec::new());
@@ -936,13 +905,12 @@ mod tests {
         assert_eq!(Settings::compose(&person, &terminals.look, true).font_size, 15.0);
         let main_settings = Settings::compose(&person, &main.look, true);
         assert_eq!((main_settings.font_size, main_settings.theme.as_str()), (19.0, "moss"));
-        let mut win98: Node = serde_json::from_str(include_str!("../defaults/layouts/win98.json")).unwrap();
-        let win_settings = Settings::compose(&person, &win98.look, true);
-        assert_eq!(win_settings.theme, "win98");
-        assert_eq!(win_settings.font_family, "PxPlus IBM VGA 8x16");
+        // A shipped layout's own theme beats the person's; a theme click beats both.
+        let mut shipped = terminals;
+        assert_eq!(Settings::compose(&person, &shipped.look, true).theme, "graphite");
         let clicks = crate::layout_sync::State { theme: Some(ThemeChoice::One("ink".into())), ..Default::default() };
-        clicks.apply(&mut win98);
-        assert_eq!(Settings::compose(&person, &win98.look, true).theme, "ink");
+        clicks.apply(&mut shipped);
+        assert_eq!(Settings::compose(&person, &shipped.look, true).theme, "ink");
     }
 
     /// The guide agents read (written to the home folder) explains every

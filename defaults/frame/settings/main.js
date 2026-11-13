@@ -15,7 +15,7 @@ const SECTIONS = [
   { id: "updates", title: "About", icon: "refresh" },
 ];
 
-const LOOKS = { main: "Herde", terminals: "Terminals", win98: "Herdr 98" };
+const LOOKS = { main: "Herde", terminals: "Terminals" };
 const APPEARANCES = [
   [null, "System"],
   ["light", "Light"],
@@ -337,7 +337,7 @@ export default class Settings extends View {
       .flex_wrap()
       .gap(8)
       .children(
-        // A theme named like a layout (themes/win98.json) is that layout's own.
+        // A theme named like a layout (themes/<layout>.json) is that layout's own.
         themes()
           .filter((x) => Boolean(x.light) === light && (x.name === shared("layout") || !layouts().includes(x.name)))
           .map(({ name, colors: c }) => {

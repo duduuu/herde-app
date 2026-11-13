@@ -26,6 +26,7 @@ Herde는 Herdr의 `herdr-app`(데스크톱 앱)과 `herdr-core`(`hc`, 터미널 
 | 중국 계열 에이전트 (DeepSeek Harness, Kimi, Qoder) | 제거 |
 | 터미널 OSC 52 클립보드 쓰기 | 기본 꺼짐(설정으로 켤 수 있음) |
 | 공개 릴리스 CI (R2 업로드, 서명·공증) | 워크플로 삭제 |
+| Herdr 98 레이아웃 (`win98`) | 삭제 |
 | 외부 mod 공유 안내 (herdr.dev, 공개 GitHub) | 사내 저장소 안내로 교체 |
 
 ## 0. 앱 이름과 식별자
@@ -48,7 +49,7 @@ Herde는 Herdr의 `herdr-app`(데스크톱 앱)과 `herdr-core`(`hc`, 터미널 
   - 아이콘 파일 `Herdr.icns`와 로고
   - 에이전트 문서(AGENTS.md, SKILL.md)의 Herdr 표기. 문서 앞머리에 Herde라는 안내만 추가
 - **공식 Herdr와 같은 컴퓨터에 함께 설치하는 것은 지원하지 않는다.** CLI 이름, 데이터 폴더, 소켓이 같아서 충돌한다. Herdr를 지운 뒤 Herde를 설치한다.
-- Windows 설치 스크립트(`distribution/install.ps1`)와 win98 레이아웃의 문구는 바꾸지 않았다.
+- Windows 설치 스크립트(`distribution/install.ps1`)의 문구는 바꾸지 않았다.
 - macOS 코어 번들 서명 검사(`macos_bundle.rs`, `core_bin.rs`)에는 아직 Herdr의 Apple 팀 ID(`2W9652Q7QR`)가 남아 있다. 다운로드·업데이트 경로에서만 쓰여서 지금은 영향이 없지만, 사내 서명 팀 ID가 정해지면 함께 바꾼다.
 
 ## 1. 원격 머신
@@ -96,7 +97,7 @@ Herde는 Herdr의 `herdr-app`(데스크톱 앱)과 `herdr-core`(`hc`, 터미널 
 ## 4. 에이전트 연동
 
 - 제거(중국 계열): DeepSeek Harness(`dsh-tui`), Kimi(`kimi`), Qoder(`qoder`).
-  - `defaults/programs.json` 항목, `defaults/icons/` 아이콘, `win98/taskbar.js` 항목
+  - `defaults/programs.json` 항목, `defaults/icons/` 아이콘
 - 유지: claude, codex, copilot, gemini, cursor, opencode, pi, pig, amp, grok, antigravity, kiro, hermes, crush, 이름 매칭만 하는 항목(mastracode, muse, command-code, prime-agent, ollama).
 - 이 목록은 이름 매칭과 실행 버튼만 담당한다. hook을 설치하지 않고, 통신도 하지 않는다. 코어에는 에이전트 목록 자체가 없다.
 - 사용자가 직접 설치한 CLI 실행이나 OpenCode 같은 도구의 모델 선택은 앱이 막을 수 없다. 네트워크 정책으로 통제한다.
@@ -109,7 +110,15 @@ Herde는 Herdr의 `herdr-app`(데스크톱 앱)과 `herdr-core`(`hc`, 터미널 
 | 코어의 OSC 52/8/9 통과 | 코어는 그대로 전달만 함. 실제 처리는 앱의 위 설정이 결정 |
 | 터미널 링크 Ctrl/Cmd-클릭 | 유지(사용자 클릭 시에만, 모든 스킴). 필요하면 http(s)와 file로 제한 |
 
-## 6. CI·배포
+## 6. 레이아웃
+
+- **Herdr 98(`win98`) 삭제.** 함께 지운 것:
+  - mod `defaults/mods/win98/`(픽셀 폰트, 게임, 효과음 포함), 레이아웃 `win98.json`과 미리보기 `win98.svg`, 테마 `win98.json`
+  - 폰트 라이선스(MS Sans Serif, PxPlus, `licenses/CC-BY-SA-3.0.txt`)와 `THIRD-PARTY-NOTICES`의 해당 부분. 생성기(`just notices`)를 돌리지 못해 손으로 고쳤으니, 툴이 있는 환경에서 다시 생성해 비교한다
+- 기존 설치본에 있던 손대지 않은 `win98` 레이아웃과 mod는 앱이 시작할 때 자동으로 지워진다.
+- 남은 기본 레이아웃: `main`(Herde), `terminals`
+
+## 7. CI·배포
 
 | 항목 | 처리 |
 |---|---|
