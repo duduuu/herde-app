@@ -18,6 +18,8 @@ Input-SHA256: e7bae1721866dc0152e9e8f9fb8c0033a6f8ee98f63c4d64b0f06bf6f27a13e8 d
 Input-SHA256: 9348ddfd44da5a127c59141981954746a860ec8e03e0412cf3af7134af0f97e2 defaults/mods/win98/fonts/LICENSE-PxPlus.txt
 Input-SHA256: 3f941b3b89cf7b8370ceb83cc76d2120d471b58735d8ca60238a751a48d7f72f licenses/CC-BY-SA-3.0.txt
 Input-SHA256: a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499 licenses/CC0-1.0.txt
+Input-SHA256: 2d58b85d277b33f4866b1c3d11e0f43c72e0767ac4bfd70effb24ceda98abe69 licenses/Dracula.txt
+Input-SHA256: 58d8be65422d80fbcd2dac92a4c1dced7271e529e6836f2aa660e93e4c831ac0 licenses/Nord.txt
 Input-SHA256: 22c1bd99806822d9b184c4e5079ff3845b1e9fcaaabfd3a6e48dd9f443fd4cff licenses/QuickJS-source.txt
 Input-SHA256: 96f73f9d2a16c21a36b418f06073be26e7d6d5e7c1bc99756b21a4f2c74ef171 licenses/QuickJS.txt
 Input-SHA256: a754355f3b49ef0cd20e2a65f29a45b3164693d1c929474fa90b4e635d9b90a4 licenses/README.md
@@ -28,7 +30,7 @@ Input-SHA256: f8ac2c75e7f629a87565c80d61ff9fe5aa15cdea0bda997d52a4dc13fdbd19cb l
 Input-SHA256: 5c537d6853e005298a285d508cff9ac7192cea23576c840d485b2b586a7ff177 licenses/Zig.txt
 Input-SHA256: d25e82e26acd42ca3ccc9993622631163425b869b9e16284226d534cff6470f2 licenses/highway-BSD3.txt
 Input-SHA256: 43070e2d4e532684de521b885f385d0841030efa2b1a20bafb76133a5e1379c1 licenses/highway.txt
-Input-SHA256: 6f440b2e11f1729f94e191d7a2c106c6cbf5b5a40bae8915f321b5f361251d79 licenses/inventory.json
+Input-SHA256: 0b87bc0d8c128f0732ed5428365a4af2ef4c40cc65fd670a2e088821f1dbeefe licenses/inventory.json
 Input-SHA256: f9bc4423732350eb0b3f7ed7e91d530298476f8fec0c6c427a1c04ade22655af licenses/musl.txt
 Input-SHA256: 204bbed08ddeeecb362b4da36d3479a0167b7356a9d6024a24f9833affbe228a licenses/simdutf-TH.txt
 Input-SHA256: fc8dbc04e03ad4efc08a647ffe7f995b811a95bc04c0e85a56d5277c6593fa5f licenses/simdutf.txt
@@ -21646,4 +21648,57 @@ Apache License
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+
+----------------------------------------------------------------------
+Nord theme palette
+https://github.com/nordtheme/nord; https://www.nordtheme.com/docs/colors-and-palettes. Herdr UI colors adapted for the Nord palette.
+
+--- licenses/Nord.txt ---
+MIT License (MIT)
+
+Copyright (c) 2016-present Sven Greb <development@svengreb.de> (https://www.svengreb.de)
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+----------------------------------------------------------------------
+Dracula theme palette
+https://github.com/dracula/ghostty/blob/main/dracula. Herdr UI colors adapted for the Dracula palette.
+
+--- licenses/Dracula.txt ---
+MIT License
+
+Copyright (c) 2023 Dracula Theme
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 

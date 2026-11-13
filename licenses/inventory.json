@@ -191,6 +191,20 @@
       "files": [
         "LICENSE"
       ]
+    },
+    {
+      "name": "Nord theme palette",
+      "source": "https://github.com/nordtheme/nord; https://www.nordtheme.com/docs/colors-and-palettes. Herdr UI colors adapted for the Nord palette.",
+      "files": [
+        "licenses/Nord.txt"
+      ]
+    },
+    {
+      "name": "Dracula theme palette",
+      "source": "https://github.com/dracula/ghostty/blob/main/dracula. Herdr UI colors adapted for the Dracula palette.",
+      "files": [
+        "licenses/Dracula.txt"
+      ]
     }
   ]
 }

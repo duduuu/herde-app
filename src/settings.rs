@@ -96,9 +96,11 @@ fn preset(name: &str) -> Option<&'static Palette> {
 /// The shipped theme files (defaults/themes), written to `themes/` when missing.
 const THEMES: &[(&str, &str)] = &[
     ("atom-one-dark", include_str!("../defaults/themes/atom-one-dark.json")),
+    ("nord", include_str!("../defaults/themes/nord.json")),
+    ("dracula", include_str!("../defaults/themes/dracula.json")),
     ("win98", include_str!("../defaults/themes/win98.json")),
 ];
-pub const SHIPPED_THEMES: &[&str] = &["atom-one-dark", "win98"];
+pub const SHIPPED_THEMES: &[&str] = &["atom-one-dark", "nord", "dracula", "win98"];
 
 /// `themes/<name>.json`: a palette, plus `colors` overrides like settings.json's.
 #[derive(Deserialize)]
